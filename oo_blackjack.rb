@@ -17,8 +17,6 @@ class Deck
 
     cards.each do |card|
       case
-      when card[0] == "A"
-        deck.store(card, 11)
       when card[0] == "2"
         deck.store(card, 2)
       when card[0] == "3"
@@ -43,6 +41,8 @@ class Deck
         deck.store(card, 10)
       when card[0] == "K"
         deck.store(card, 10)
+      when card[0] == "A"
+        deck.store(card, 11)
       end
     end
   
@@ -52,35 +52,66 @@ class Deck
   def shuffle
     self.deck = Hash[deck.to_a.shuffle!]
   end
+
+  def initial_cards(player, dealer)
+    player << deal << deal
+    dealer << deal << deal
+  end
+
+  def deal
+    deck.shift
+  end
 end
 
-class Hand
-  def initialize
+module Hand
+  def hit(card)
+    hand << card
+  end
+
+  def total
+    hand.to_h.values.reduce(:+)
   end
 end
 
 class Player
-  def initialize
+  include Hand
+  attr_reader :name
+  attr_accessor :hand
+  
+  def initialize(name)
+    @name = name
+    @hand = []
   end
 end
 
 class Dealer
-  def initialize
+  include Hand
+  DEALER_STAY = 17
+  
+  attr_reader :name
+  attr_accessor :hand
+  
+  def initialize(name)
+    @name = name
+    @hand = []
   end
+
+
 end
 
 class Blackjack
-  attr_accessor :deck, :hand, :player, :dealer
+  BLACKJACK = 21
+  attr_accessor :deck, :player, :dealer
 
   def initialize
     @deck = Deck.new
-    @hand = Hand.new
-    @player = Player.new
-    @dealer = Dealer.new
+    @player = Player.new("Toby")
+    @dealer = Dealer.new("Dealer")
   end
-
+  
   def play
     deck.shuffle
+    deck.initial_cards(player.hand, dealer.hand)
 
   end
 end
