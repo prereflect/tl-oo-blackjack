@@ -72,7 +72,7 @@ module Hand
   end
 
   def show_cards
-    p hand
+    puts "#{ hand.to_h.keys.join(", ") } Total: #{ total }"
   end
   
   def stay
@@ -124,6 +124,7 @@ class Blackjack
   def play
     deck.shuffle
     deck.initial_cards(player.hand, dealer.hand)
+    player.show_cards
   end
 end
 
