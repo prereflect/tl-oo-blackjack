@@ -65,11 +65,17 @@ end
 
 module Hand
   def hit(card)
-    hand << card
   end
 
   def total
     hand.to_h.values.reduce(:+)
+  end
+
+  def show_cards
+    p hand
+  end
+  
+  def stay
   end
 end
 
@@ -81,6 +87,10 @@ class Player
   def initialize(name)
     @name = name
     @hand = []
+  end
+
+  def player_hit(card)
+    hand << card
   end
 end
 
@@ -96,7 +106,9 @@ class Dealer
     @hand = []
   end
 
-
+  def dealer_hit(card)
+    hand << card
+  end
 end
 
 class Blackjack
@@ -112,7 +124,6 @@ class Blackjack
   def play
     deck.shuffle
     deck.initial_cards(player.hand, dealer.hand)
-
   end
 end
 
