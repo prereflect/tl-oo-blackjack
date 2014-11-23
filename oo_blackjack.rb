@@ -67,15 +67,23 @@ end
 
 module Hand
   def show_cards
-    puts "#{ name }\'s cards: #{ hand.to_h.keys.join(", ") } Total: #{ total }"
+    puts "#{ name }\'s cards: #{ cards } Total: #{ total }"
   end
 
   def hit(card)
     hand << card
   end
 
+  def cards
+    hand.to_h.keys.join(", ")
+  end
+
   def total
     hand.to_h.values.reduce(:+)
+  end
+
+  def over_21?
+    total > 21
   end
 end
 
@@ -133,7 +141,7 @@ class Blackjack
     end
   end
 
-  def player_hit
+  def player_turn
     loop do
       player.show_cards
    
@@ -152,7 +160,7 @@ class Blackjack
     end
   end
 
-  def dealer_hit
+  def dealer_turn
     system "clear"
     dealer.show_cards
     
@@ -169,8 +177,8 @@ class Blackjack
     deck.shuffle_deck!
     deck.initial_cards(player.hand, dealer.hand)
     initial_blackjack?
-    player_hit   
-    dealer_hit 
+    player_turn
+    dealer_turn
   end
 end
 
