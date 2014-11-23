@@ -51,7 +51,7 @@ class Deck
     @deck = deck
   end
   
-  def shuffle
+  def shuffle_deck!
     self.deck = Hash[deck.to_a.shuffle!]
   end
 
@@ -166,7 +166,7 @@ class Blackjack
   
   def play
     system "clear"
-    deck.shuffle
+    deck.shuffle_deck!
     deck.initial_cards(player.hand, dealer.hand)
     initial_blackjack?
     player_hit   
