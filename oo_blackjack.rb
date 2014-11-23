@@ -1,3 +1,5 @@
+require "pry"
+
 class Deck
   SUITS = %w(Hearts Diamonds Clubs Spades)
   VALUES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King)
@@ -64,18 +66,16 @@ class Deck
 end
 
 module Hand
+  def show_cards
+    puts "#{ name }\'s cards: #{ hand.to_h.keys.join(", ") } Total: #{ total }"
+  end
+
   def hit(card)
+    hand << card
   end
 
   def total
     hand.to_h.values.reduce(:+)
-  end
-
-  def show_cards
-    puts "#{ hand.to_h.keys.join(", ") } Total: #{ total }"
-  end
-  
-  def stay
   end
 end
 
@@ -88,16 +88,10 @@ class Player
     @name = name
     @hand = []
   end
-
-  def player_hit(card)
-    hand << card
-  end
 end
 
 class Dealer
   include Hand
-  DEALER_STAY = 17
-  
   attr_reader :name
   attr_accessor :hand
   
@@ -105,14 +99,11 @@ class Dealer
     @name = name
     @hand = []
   end
-
-  def dealer_hit(card)
-    hand << card
-  end
 end
 
 class Blackjack
   BLACKJACK = 21
+  DEALER_STAY = 17
   attr_accessor :deck, :player, :dealer
 
   def initialize
@@ -121,10 +112,65 @@ class Blackjack
     @dealer = Dealer.new("Dealer")
   end
   
+  def initial_blackjack?
+    if player.total == BLACKJACK && dealer.total == BLACKJACK
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "Push! #{ player.name } & #{ dealer.name } both have Blackjack"
+    
+    elsif player.total == BLACKJACK
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "Blackjack! #{ player.name } wins"
+    
+    elsif dealer.total == BLACKJACK
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "Blackjack! #{ dealer.name } wins"
+    end
+  end
+
+  def player_hit
+    loop do
+      player.show_cards
+   
+      begin
+        puts
+        puts "#{ player.name }, would you like to Hit or Stay? [h/s]"
+        input = gets.chomp.downcase
+      end until ['h', 's'].include?(input)
+   
+      if input == "h"
+        player.hit(deck.deal)
+        system "clear"
+      else
+        break
+      end
+    end
+  end
+
+  def dealer_hit
+    system "clear"
+    dealer.show_cards
+    
+    while dealer.total < DEALER_STAY
+      dealer.hit(deck.deal)
+      puts
+      puts "Dealer hits..."
+      dealer.show_cards
+    end
+  end
+  
   def play
+    system "clear"
     deck.shuffle
     deck.initial_cards(player.hand, dealer.hand)
-    player.show_cards
+    initial_blackjack?
+    player_hit   
+    dealer_hit 
   end
 end
 
