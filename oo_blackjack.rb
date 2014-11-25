@@ -1,3 +1,5 @@
+require "pry"
+
 class Deck
   SUITS = %w(Hearts Diamonds Clubs Spades)
   VALUES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King)
@@ -81,10 +83,6 @@ module Hand
   def total
     hand.to_h.values.reduce(:+)
   end
-
-  def over_21?
-    total > 21
-  end
 end
 
 class Player
@@ -126,18 +124,21 @@ class Blackjack
       dealer.show_cards
       puts
       puts "Push! #{ player.name } & #{ dealer.name } both have Blackjack"
+      play_again?
     
     elsif player.total == BLACKJACK
       player.show_cards
       dealer.show_cards
       puts
       puts "Blackjack! #{ player.name } wins"
+      play_again?
     
     elsif dealer.total == BLACKJACK
       player.show_cards
       dealer.show_cards
       puts
       puts "Blackjack! #{ dealer.name } wins"
+      play_again?
     end
   end
 
@@ -153,10 +154,29 @@ class Blackjack
    
       if input == "h"
         player.hit(deck.deal)
+        player_game_over?
         system "clear"
       else
         break
       end
+    end
+  end
+
+  def player_game_over?
+    if player.total == 21
+      system "clear"
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "21! #{ player.name }, You win!"
+      play_again?
+    elsif player.total > 21
+      system "clear"
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "#{ player.name }, You Busted. #{ dealer.name } wins"
+      play_again?
     end
   end
 
@@ -169,9 +189,43 @@ class Blackjack
       puts
       puts "Dealer hits..."
       dealer.show_cards
+      dealer_game_over?
     end
   end
-  
+
+  def dealer_game_over?
+    if dealer.total == 21
+      system "clear"
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "21! #{ dealer.name } wins"
+      play_again?
+    elsif dealer.total > 21
+      system "clear"
+      player.show_cards
+      dealer.show_cards
+      puts
+      puts "#{ dealer.name } Busted. #{ player.name } wins!"
+      play_again?
+    end
+  end
+
+  def play_again?
+    begin
+      puts
+      puts "Play again? [y/n]"
+      play_again = gets.chomp.downcase
+    end until play_again.eql?("y") || play_again.eql?("n")
+    if play_again == "y"
+      Blackjack.new.play
+    else
+      system "clear"
+      puts "Thanks for playing!"
+      exit
+    end
+  end
+
   def play
     system "clear"
     deck.shuffle_deck!
