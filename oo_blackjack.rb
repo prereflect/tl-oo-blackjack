@@ -1,5 +1,3 @@
-require "pry"
-
 class Deck
   SUITS = %w(Hearts Diamonds Clubs Spades)
   VALUES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King)
@@ -8,7 +6,6 @@ class Deck
  
   def initialize  
     cards = []
-
     SUITS.each do |suit|
       VALUES.each do |value|
         cards << "#{ value } of #{ suit }"
@@ -16,7 +13,6 @@ class Deck
     end
 
     deck = {}
-
     cards.each do |card|
       case
       when card[0] == "2"
@@ -47,7 +43,6 @@ class Deck
         deck.store(card, 11)
       end
     end
-  
     @deck = deck
   end
   
@@ -78,6 +73,14 @@ module Hand
 
   def cards
     hand.to_h.keys.join(", ")
+  end
+
+  def total_with_ace?
+    hand.to_h.values.include?(11)
+  end
+
+  def over_21?
+    hand.to_h.values.reduce(:+) > 21
   end
 
   def total
@@ -145,13 +148,11 @@ class Blackjack
   def player_turn
     loop do
       player.show_cards
-   
       begin
         puts
         puts "#{ player.name }, would you like to Hit or Stay? [h/s]"
         input = gets.chomp.downcase
       end until ['h', 's'].include?(input)
-   
       if input == "h"
         player.hit(deck.deal)
         player_game_over?
@@ -159,6 +160,18 @@ class Blackjack
       else
         break
       end
+    end
+  end
+
+  def dealer_turn
+    system "clear"
+    player.show_cards
+    dealer.show_cards
+    while dealer.total < DEALER_STAY
+      dealer.hit(deck.deal)
+      puts
+      puts "Dealer hits..."
+      dealer.show_cards
     end
   end
 
@@ -170,7 +183,7 @@ class Blackjack
       puts
       puts "21! #{ player.name }, You win!"
       play_again?
-    elsif player.total > 21
+    elsif player.over_21?
       system "clear"
       player.show_cards
       dealer.show_cards
@@ -180,33 +193,33 @@ class Blackjack
     end
   end
 
-  def dealer_turn
-    system "clear"
-    dealer.show_cards
-    
-    while dealer.total < DEALER_STAY
-      dealer.hit(deck.deal)
-      puts
-      puts "Dealer hits..."
-      dealer.show_cards
-      dealer_game_over?
-    end
-  end
-
   def dealer_game_over?
     if dealer.total == 21
-      system "clear"
-      player.show_cards
-      dealer.show_cards
       puts
       puts "21! #{ dealer.name } wins"
       play_again?
-    elsif dealer.total > 21
+    elsif dealer.over_21?
+      puts
+      puts "#{ dealer.name } Busted. #{ player.name } wins!"
+      play_again?
+    end
+  end
+
+  def compare_hands
+    if player.total > dealer.total
+      puts
+      puts "#{ player.name } wins!"
+      play_again?
+    elsif dealer.total > player.total
+      puts
+      puts "#{ dealer.name } wins"
+      play_again?
+    else
       system "clear"
       player.show_cards
       dealer.show_cards
       puts
-      puts "#{ dealer.name } Busted. #{ player.name } wins!"
+      puts "It\'s a Push! No winner"
       play_again?
     end
   end
@@ -216,7 +229,7 @@ class Blackjack
       puts
       puts "Play again? [y/n]"
       play_again = gets.chomp.downcase
-    end until play_again.eql?("y") || play_again.eql?("n")
+    end until ["y", "n"].include?(play_again)
     if play_again == "y"
       Blackjack.new.play
     else
@@ -233,6 +246,8 @@ class Blackjack
     initial_blackjack?
     player_turn
     dealer_turn
+    dealer_game_over?
+    compare_hands
   end
 end
 
