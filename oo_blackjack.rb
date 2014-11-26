@@ -122,31 +122,27 @@ class Blackjack
   end
   
   def initial_blackjack?
+    player.show_cards
+    dealer.show_cards
+    puts
     case
     when player.total == BLACKJACK && dealer.total == BLACKJACK
-      player.show_cards
-      dealer.show_cards
-      puts
       puts "Push! #{ player.name } & #{ dealer.name } both have Blackjack"
       play_again?
     
     when player.total == BLACKJACK
-      player.show_cards
-      dealer.show_cards
-      puts
       puts "Blackjack! #{ player.name } wins"
       play_again?
     
     when dealer.total == BLACKJACK
-      player.show_cards
-      dealer.show_cards
-      puts
       puts "Blackjack! #{ dealer.name } wins"
       play_again?
     end
   end
 
   def player_turn
+    system "clear"
+
     loop do
       player.show_cards
     
