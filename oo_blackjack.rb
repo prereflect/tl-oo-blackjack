@@ -177,21 +177,18 @@ class Blackjack
   end
 
   def player_game_over?
+    system "clear"
+    
+    player.show_cards
+    dealer.show_cards
+    puts
+    
     case
-
     when player.total == 21
-      system "clear"
-      player.show_cards
-      dealer.show_cards
-      puts
       puts "21! #{ player.name }, You win!"
       play_again?
 
     when player.over_21?
-      system "clear"
-      player.show_cards
-      dealer.show_cards
-      puts
       puts "#{ player.name }, You Busted. #{ dealer.name } wins"
       play_again?
     end
@@ -199,7 +196,6 @@ class Blackjack
 
   def dealer_game_over?
     case
-
     when dealer.total == 21
       puts
       puts "21! #{ dealer.name } wins"
@@ -214,7 +210,6 @@ class Blackjack
 
   def compare_hands
     case
-
     when player.total > dealer.total
       puts
       puts "#{ player.name } wins!"
