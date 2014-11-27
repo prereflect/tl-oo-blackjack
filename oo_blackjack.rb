@@ -1,7 +1,6 @@
 class Deck
   SUITS = %w(Hearts Diamonds Clubs Spades)
   VALUES = %w(Ace 2 3 4 5 6 7 8 9 10 Jack Queen King)
- 
   attr_accessor :deck
  
   def initialize  
@@ -43,6 +42,7 @@ class Deck
         deck.store(card, 11)
       end
     end
+
     @deck = deck
   end
   
@@ -63,10 +63,6 @@ class Deck
 end
 
 module Hand
-  def show_cards
-    puts "#{ name }\'s cards: #{ cards } Total: #{ total }"
-  end
-
   def hit(card)
     hand << card
   end
@@ -75,16 +71,39 @@ module Hand
     hand.to_h.keys.join(", ")
   end
 
-  def total_with_ace?
-    hand.to_h.values.include?(11)
+  def total
+    if over_21? && total_with_ace?
+      fix_ace_over_21
+    else
+      hand.to_h.values.reduce(:+)
+    end
   end
-
+  
   def over_21?
     hand.to_h.values.reduce(:+) > 21
   end
 
-  def total
-    hand.to_h.values.reduce(:+)
+  def total_with_ace?
+    hand.to_h.values.include?(11)
+  end
+
+  def fix_ace_over_21
+    total = hand.to_h.values
+    amount_of_aces = total.count(11)
+    total.delete(11)
+    amount_of_aces.times { total << 1 }
+    amount_of_aces.times do
+      if total.reduce(:+) <= 10
+        total << 10
+      else
+        total << 0
+      end
+    end
+    total.reduce(:+)
+  end
+  
+  def show_cards
+    puts "#{ name }\'s cards: #{ cards } Total: #{ total }"
   end
 end
 
@@ -93,8 +112,8 @@ class Player
   attr_reader :name
   attr_accessor :hand
   
-  def initialize(name)
-    @name = name
+  def initialize
+    @name = "Player"
     @hand = []
   end
 end
@@ -117,7 +136,7 @@ class Blackjack
 
   def initialize
     @deck = Deck.new
-    @player = Player.new("Toby")
+    @player = Player.new
     @dealer = Dealer.new
   end
   
@@ -125,6 +144,7 @@ class Blackjack
     player.show_cards
     dealer.show_cards
     puts
+
     case
     when player.total == BLACKJACK && dealer.total == BLACKJACK
       puts "Push! #{ player.name } & #{ dealer.name } both have Blackjack"
@@ -162,23 +182,8 @@ class Blackjack
     end
   end
 
-  def dealer_turn
-    system "clear"
-
-    player.show_cards
-    dealer.show_cards
-
-    while dealer.total < DEALER_STAY
-      dealer.hit(deck.deal)
-      puts
-      puts "Dealer hits..."
-      dealer.show_cards
-    end
-  end
-
   def player_game_over?
     system "clear"
-    
     player.show_cards
     dealer.show_cards
     puts
@@ -188,9 +193,23 @@ class Blackjack
       puts "21! #{ player.name }, You win!"
       play_again?
 
-    when player.over_21?
+    when player.total > 21
       puts "#{ player.name }, You Busted. #{ dealer.name } wins"
       play_again?
+    end
+  end
+  
+  def dealer_turn
+    system "clear"
+    player.show_cards
+    dealer.show_cards
+
+    while dealer.total < DEALER_STAY
+      dealer.hit(deck.deal)
+      puts
+      puts "Dealer hits..."
+      dealer.show_cards
+      dealer_game_over?
     end
   end
 
@@ -201,7 +220,7 @@ class Blackjack
       puts "21! #{ dealer.name } wins"
       play_again?
 
-    when dealer.over_21?
+    when dealer.total > 21
       puts
       puts "#{ dealer.name } Busted. #{ player.name } wins!"
       play_again?
@@ -238,7 +257,6 @@ class Blackjack
       Blackjack.new.play
     else
       system "clear"
-
       puts "Thanks for playing!"
       exit
     end
@@ -246,16 +264,11 @@ class Blackjack
 
   def play
     system "clear"
-
     deck.shuffle_deck!
     deck.initial_cards(player.hand, dealer.hand)
     initial_blackjack?
-
     player_turn
-
     dealer_turn
-    dealer_game_over?
-
     compare_hands
   end
 end
