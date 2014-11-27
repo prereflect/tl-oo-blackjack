@@ -93,7 +93,7 @@ module Hand
     total.delete(11)
     amount_of_aces.times { total << 1 }
     amount_of_aces.times do
-      if total.reduce(:+) <= 10
+      if total.reduce(:+) <= 11
         total << 10
       else
         total << 0
