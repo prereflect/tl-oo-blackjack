@@ -67,10 +67,6 @@ module Hand
     hand << card
   end
 
-  def cards
-    hand.to_h.keys.join(", ")
-  end
-
   def total
     if over_21? && total_with_ace?
       fix_ace_over_21
@@ -84,6 +80,10 @@ module Hand
   end
 
   private
+
+  def cards
+    hand.to_h.keys.join(", ")
+  end
 
   def over_21?
     hand.to_h.values.reduce(:+) > 21
