@@ -79,6 +79,12 @@ module Hand
     end
   end
   
+  def show_cards
+    puts "#{ name }\'s cards: #{ cards } Total: #{ total }"
+  end
+
+  private
+
   def over_21?
     hand.to_h.values.reduce(:+) > 21
   end
@@ -100,10 +106,6 @@ module Hand
       end
     end
     total.reduce(:+)
-  end
-  
-  def show_cards
-    puts "#{ name }\'s cards: #{ cards } Total: #{ total }"
   end
 end
 
